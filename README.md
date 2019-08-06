@@ -36,6 +36,8 @@ This is done with the `vector<int> findRedObject()` method, which will return th
 
 This uses a rudimentary algorithm, which is good enough for simple cases where there is only one object. For each row and each column, we count the number of red pixels in the row/column. From there, the centre is determined to be the intersection of the row and column with the largest number of red pixels.
 
+This algorithm does not tell you anything about the shape of the object, and would likely not work if there were more than one object on screen.
+
 ### Output
 
 `posterizeRed()` colours each pixel in the image red or white, depending on whether it is red.
