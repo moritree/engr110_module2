@@ -7,38 +7,6 @@ using namespace std;
 #define CAMERA_WIDTH 320
 #define CAMERA_HEIGHT 240 
 
-int SavePPM(char fn[5]){
-  //save image into ppm file
-  FILE *fp;
-  char fname[9];
-  sprintf(fname,"%s",fn);
-  fp = fopen(fname,"wb");
-  if ( !fp){
-           printf("Unable to open the file\n");
-           return -1;
-   }
-   // write file header
-   fprintf(fp,"P6\n %d %d %d\n",CAMERA_WIDTH , CAMERA_HEIGHT,255);
-   int ind = 0;
-   int row = 0;
-   int col = 0;
-   char red;
-   char green;
-   char blue;
-   for ( row = 0 ; row < CAMERA_HEIGHT; row++){
-     for ( col = 0 ; col < CAMERA_WIDTH; col++){
-        red =  pixels_buf[ind];
-		green =  pixels_buf[ind+1];
-		blue =  pixels_buf[ind+2];
-		fprintf(fp,"%c%c%c",red,green,blue);
-		ind = ind + 3;
-     }
-   }
-   fflush(fp);
-   fclose(fp);
-   return 0;
-}
-
 class imageProcessing {
 private:
 	const double ratioThreshold = 1.5;
@@ -131,6 +99,12 @@ public:
 	}
 };
 
+class motorControl {
+	
+};
+
+
+
 int main()
 {
   int err;
@@ -138,6 +112,7 @@ int main()
   err = init(0);
   cout<<"After init() error="<<err<<endl;
   
+  int yMid = CAMERA_HEIGHT/2;
   int count = 0;
   open_screen_stream();
   
@@ -147,14 +122,12 @@ int main()
 	  take_picture();
 	  update_screen();
 	  
-	  ip.findRedObject();
+	  vector<int> redPos = ip.findRedObject();
+	  int yDiff = yMid - redPos[1];
+	  	  
+	  
 	  count ++;
   }
 	
-  if (SavePPM("out") != 0){
-    printf(" Can not save file\n");
-    return -1;
-  };
-  close_screen_stream();
 }
 
