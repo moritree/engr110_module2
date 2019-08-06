@@ -114,7 +114,7 @@ int main()
   
   int yMid = CAMERA_HEIGHT/2;
   int count = 0;
-  double Kp = 0.1;
+  double Kp = 0.03;
   
   open_screen_stream();
   
@@ -133,6 +133,7 @@ int main()
 	  
 	  set_motors(5,motorAdjust);
 	  hardware_exchange();
+	  sleep1(100);
 	  
 	  count ++;
   }
