@@ -114,20 +114,29 @@ int main()
   
   int yMid = CAMERA_HEIGHT/2;
   int count = 0;
+  double Kp = 0.1;
+  
   open_screen_stream();
   
   imageProcessing ip;
   
-  while(count < 10){
+  while(count < 50){
 	  take_picture();
 	  update_screen();
 	  
 	  vector<int> redPos = ip.findRedObject();
-	  int yDiff = yMid - redPos[1];
-	  	  
+	  double error = (yMid - redPos[1])*Kp;
+	  int motorAdjust = 48 + (int)error;
+	  printf("Motor: %d\n",motorAdjust);
+	  printf("error: %f\n",error);
+	  
+	  
+	  set_motors(5,motorAdjust);
+	  hardware_exchange();
 	  
 	  count ++;
   }
+  stoph();
 	
 }
 
