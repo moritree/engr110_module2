@@ -1,7 +1,16 @@
+#include <iostream>
+#include "E101.h"
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define CAMERA_WIDTH 320
+#define CAMERA_HEIGHT 240 
+
 class imageProcessing {
 private:
-	static const double ratioThreshold = 1.5;
-	static const double redThreshold = 150;
+	const double ratioThreshold = 1.5;
+	const double redThreshold = 150;
 
 public:
 	/**
@@ -44,7 +53,7 @@ public:
 	/**
 	* Draws a black cross on the intersection of the row and column with the most red
 	*/
-	void findRedObject() {
+	vector<int> findRedObject() {
 		int redInRow [CAMERA_HEIGHT] = { 0 };
 		int redInCol [CAMERA_WIDTH] = { 0 };
 		for (int i = 0; i < CAMERA_HEIGHT; i ++) {
@@ -80,6 +89,35 @@ public:
 		for (int i = reddestRow - 5; i <= reddestRow + 5; i ++) set_pixel(i, reddestCol, 0, 0, 0);
 		for (int i = reddestCol - 5; i <= reddestCol + 5; i ++) set_pixel(reddestRow, i, 0, 0, 0);
 
+
 		printf("Object coordinates: (%d, %d)\n", reddestCol, reddestRow);
+		vector<int> vect;
+		vect.push_back(reddestRow);
+		vect.push_back(reddestCol);
+		
+		return vect;
 	}
 };
+
+int main()
+{
+  int err;
+  cout<<" Hello"<<endl;
+  err = init(0);
+  cout<<"After init() error="<<err<<endl;
+  
+  int count = 0;
+  open_screen_stream();
+  
+  imageProcessing ip;
+  
+  while(count < 10){
+	  take_picture();
+	  update_screen();
+	  
+	  ip.findRedObject();
+	  count ++;
+  }
+  close_screen_stream();
+}
+
