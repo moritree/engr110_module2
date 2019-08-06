@@ -41,6 +41,9 @@ public:
 		}
 	}
 
+	/**
+	* Draws a black cross on the intersection of the row and column with the most red
+	*/
 	void findRedObject() {
 		int redInRow [CAMERA_HEIGHT] = { 0 };
 		int redInCol [CAMERA_WIDTH] = { 0 };
