@@ -38,4 +38,4 @@ This uses a rudimentary algorithm, which is good enough for simple cases where t
 
 ### Output
 
-*posterizeRed* colours each pixel in the image red or white, depending on whether it is red.
+`posterizeRed()` colours each pixel in the image red or white, depending on whether it is red.
