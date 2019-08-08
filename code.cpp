@@ -7,11 +7,11 @@ using namespace std;
 #define CAMERA_WIDTH 320
 #define CAMERA_HEIGHT 240 
 
-class imageProcessing {
+class ImageProcessing {
 private:
 	const double ratioThreshold = 1.5;
 	const double redThreshold = 150;
-
+	const double kP = 0.03;
 public:
 	/**
 	* Returns true if there is at least one red pixel in the given image
@@ -94,50 +94,72 @@ public:
 		vector<int> vect;
 		vect.push_back(reddestRow);
 		vect.push_back(reddestCol);
-		
+
 		return vect;
+	}
+	
+	vector<double> getError() {
+		vector<int> coords = findRedObject;
+		
+		vector<double> err;
+		err.push_back((CAMERA_WIDTH / 2 - coords[0]) * Kp);
+		err.push_back((CAMERA_HEIGHT / 2 - coords[1]) * Kp);
+		
+		return err;
 	}
 };
 
-class motorControl {
+class MotorControl {
+private:
+	const int xMotor = 1;
+	const int yMotor = 5;
 	
+	int xCurrent = 48;
+	int yCurrent = 48;
+public:
+	void adjust(int errX, int errY) {
+		xCurrent += (int)errX;
+		yCurrent += (int)errY;
+		
+		set_motors(xMotor, xCurrent);
+		set_motors(yMotor, yCurrent);
+		
+		hardware_exchange();
+	}
 };
-
-
 
 int main()
 {
-  int err;
-  cout<<" Hello"<<endl;
-  err = init(0);
-  cout<<"After init() error="<<err<<endl;
+  	int err;
+ 	 cout<<" Hello"<<endl;
+ 	 err = init(0);
+ 	 cout<<"After init() error="<<err<<endl;
   
-  int yMid = CAMERA_HEIGHT/2;
-  int count = 0;
-  double Kp = 0.03;
+  	int yMid = CAMERA_HEIGHT/2;
+  	int count = 0;
+	vector<double> error;
+  	double Kp = 0.03;
+
+ 	open_screen_stream();
   
-  open_screen_stream();
+  	ImageProcessing ip;
+	MotorControl mc;
   
-  imageProcessing ip;
-  
-  while(count < 50){
-	  take_picture();
-	  update_screen();
+  	while(count < 50){
+	  	take_picture();
+	  	update_screen();
 	  
-	  vector<int> redPos = ip.findRedObject();
-	  double error = (yMid - redPos[1])*Kp;
-	  int motorAdjust = 48 + (int)error;
-	  printf("Motor: %d\n",motorAdjust);
-	  printf("error: %f\n",error);
+	  	error = ip.getError();
+		
+		mc.adjust(error[0], error[1]);
+	  	
+	  	printf("Motor: %d\n",motorAdjust);
+	  	printf("error: %f\n",error);
+
+	  	sleep1(100);
 	  
-	  
-	  set_motors(5,motorAdjust);
-	  hardware_exchange();
-	  sleep1(100);
-	  
-	  count ++;
-  }
-  stoph();
-	
+	  	count ++;
+  	}
+  	stoph();
 }
 
