@@ -145,11 +145,11 @@ int SavePPM(char fn[5]){
    return 0;
 }
 
-class imageProcessing {
+class ImageProcessing {
 private:
-	static const double ratioThreshold = 1.5;
-	static const double redThreshold = 150;
-
+	const double ratioThreshold = 1.5;
+	const double redThreshold = 150;
+	const double kP = 0.03;
 public:
 	/**
 	* Returns true if there is at least one red pixel in the given image
@@ -188,7 +188,10 @@ public:
 		}
 	}
 
-	void findRedObject() {
+	/**
+	* Draws a black cross on the intersection of the row and column with the most red
+	*/
+	vector<int> findRedObject() {
 		int redInRow [CAMERA_HEIGHT] = { 0 };
 		int redInCol [CAMERA_WIDTH] = { 0 };
 		for (int i = 0; i < CAMERA_HEIGHT; i ++) {
@@ -224,7 +227,23 @@ public:
 		for (int i = reddestRow - 5; i <= reddestRow + 5; i ++) set_pixel(i, reddestCol, 0, 0, 0);
 		for (int i = reddestCol - 5; i <= reddestCol + 5; i ++) set_pixel(reddestRow, i, 0, 0, 0);
 
+
 		printf("Object coordinates: (%d, %d)\n", reddestCol, reddestRow);
+		vector<int> vect;
+		vect.push_back(reddestRow);
+		vect.push_back(reddestCol);
+
+		return vect;
+	}
+	
+	vector<double> getError() {
+		vector<int> coords = findRedObject;
+		
+		vector<double> err;
+		err.push_back((CAMERA_WIDTH / 2 - coords[0]) * Kp);
+		err.push_back((CAMERA_HEIGHT / 2 - coords[1]) * Kp);
+		
+		return err;
 	}
 };
 
@@ -242,7 +261,7 @@ int main()
 	};
 	
 	// do your processing here
-	imageProcessing ip;
+	ImageProcessing ip;
 	printf("isRedPresent: %d\n", ip.isRedPresent());
 	ip.posterizeRed();
 	ip.findRedObject();
