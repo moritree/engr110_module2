@@ -121,10 +121,23 @@ private:
 	
 	int xCurrent = 48;
 	int yCurrent = 48;
+	
+	int xReset = 48;
+	int yReset = 48;
 public:
 	void adjust(int errX, int errY) {
-		xCurrent += (int)errX;
-		yCurrent += (int)errY;
+		xCurrent += errX;
+		yCurrent += errY;
+		
+		set_motors(xMotor, xCurrent);
+		set_motors(yMotor, yCurrent);
+		
+		hardware_exchange();
+	}
+	
+	void reset() {
+		xCurrent = xReset;
+		yCurrent = yReset;
 		
 		set_motors(xMotor, xCurrent);
 		set_motors(yMotor, yCurrent);
@@ -158,7 +171,7 @@ int main()
 		if (ip.isRedPresent()) {
 			vector<int> coords = ip.findRedObject();
 	  		error = ip.getError(coords[0], coords[1]);
-			mc.adjust(error[0], error[1]);
+			mc.adjust((int)error[0], (int)error[1]);
 			
 	  		printf("Motor: %d\n",motorAdjust);
 	  		printf("error: %f\n",error);
