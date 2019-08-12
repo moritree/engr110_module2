@@ -105,6 +105,10 @@ public:
 		// Check inside the corners - if red is found, it is not a circle
 	}
 	
+	/**
+	* Returns the X and Y error values of the given coordinates 
+	* relative to the center of the screen
+	*/
 	vector<double> getError(int row, int col) {
 		vector<double> err;
 		err.push_back((CAMERA_WIDTH / 2 - row) * Kp);
@@ -125,6 +129,9 @@ private:
 	int xReset = 48;
 	int yReset = 48;
 public:
+	/**
+	* Proportional adjustment control mechanism
+	*/
 	void adjust(int errX, int errY) {
 		xCurrent += errX;
 		yCurrent += errY;
@@ -135,6 +142,9 @@ public:
 		hardware_exchange();
 	}
 	
+	/**
+	* Sets the motors back to their "reset" position
+	*/ 
 	void reset() {
 		xCurrent = xReset;
 		yCurrent = yReset;
