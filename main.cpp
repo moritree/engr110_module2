@@ -51,7 +51,7 @@ public:
 	}
 
 	/**
-	* Draws a black cross on the intersection of the row and column with the most red
+	* Returns the coordinates the intersection of the row and column with the most red
 	*/
 	vector<int> findRedObject() {
 		int redInRow [CAMERA_HEIGHT] = { 0 };
@@ -85,11 +85,6 @@ public:
 			}
 		}
 
-		// Draw a cross at the object location
-		for (int i = reddestRow - 5; i <= reddestRow + 5; i ++) set_pixel(i, reddestCol, 0, 0, 0);
-		for (int i = reddestCol - 5; i <= reddestCol + 5; i ++) set_pixel(reddestRow, i, 0, 0, 0);
-
-
 		printf("Object coordinates: (%d, %d)\n", reddestCol, reddestRow);
 		vector<int> vect;
 		vect.push_back(reddestRow);
@@ -98,12 +93,22 @@ public:
 		return vect;
 	}
 	
-	vector<double> getError() {
-		vector<int> coords = findRedObject;
+	/**
+	* Method to determine whether the object located at (row, col) is circular
+	*/
+	boolean isObjectCircular(int row, int col) {
+		if (!pixelIsRed(row, col)) return false;
+		return true;
 		
+		// TO DO
+		// Flood fill to find leftmost, rightmost, topmost, and bottommost pixels
+		// Check inside the corners - if red is found, it is not a circle
+	}
+	
+	vector<double> getError(int row, int col) {
 		vector<double> err;
-		err.push_back((CAMERA_WIDTH / 2 - coords[0]) * Kp);
-		err.push_back((CAMERA_HEIGHT / 2 - coords[1]) * Kp);
+		err.push_back((CAMERA_WIDTH / 2 - row) * Kp);
+		err.push_back((CAMERA_HEIGHT / 2 - col) * Kp);
 		
 		return err;
 	}
@@ -149,13 +154,16 @@ int main()
 	  	take_picture();
 	  	update_screen();
 	  
-	  	error = ip.getError();
+		// Only track the sun if it is found
+		if (ip.isRedPresent()) {
+			vector<int> coords = ip.findRedObject();
+	  		error = ip.getError(coords[0], coords[1]);
+			mc.adjust(error[0], error[1]);
+			
+	  		printf("Motor: %d\n",motorAdjust);
+	  		printf("error: %f\n",error);
+		}
 		
-		mc.adjust(error[0], error[1]);
-	  	
-	  	printf("Motor: %d\n",motorAdjust);
-	  	printf("error: %f\n",error);
-
 	  	sleep1(100);
 	  
 	  	count ++;
