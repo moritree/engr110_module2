@@ -9,7 +9,7 @@ using namespace std;
 
 class ImageProcessing {
 private:
-	const double ratioThreshold = 1.5;
+	const double ratioThreshold = 1.7;
 	const double redThreshold = 100;
 	const double kP = 0.035;
 public:
@@ -117,7 +117,7 @@ public:
 		return err;
 	}
 	
-	bool isMoreThanHalf() { 
+	bool isMoreThanHalf(int objRow, int objCol) { 
 		int minX = CAMERA_WIDTH;
 		int maxX = 0;
 		int minY = CAMERA_HEIGHT;
@@ -132,11 +132,11 @@ public:
 				}
 			}
 		}
+		
 		int dx = maxX - minX;
 		int dy = maxY - minY;
-		printf("%d, %d", dx, dy);
 		
-		return (dx * 2 > dy || dy * 2 > dx);
+		return (dx * 2 > dy && dy * 2 > dx);    
 	}
 };
 
@@ -148,8 +148,8 @@ private:
 	int xCurrent = 48;
 	int yCurrent = 48;
 	
-	int xReset = 48;
-	int yReset = 48;
+	int xReset = 52;
+	int yReset = 52;
 public:
 	/**
 	* Proportional adjustment control mechanism
@@ -194,20 +194,23 @@ int main()
 	MotorControl mc;
   
   	while(count < 100){
+		printf("\n- FRAME %d -\n", count);
 	  	take_picture();
 		
 		ip.posterizeRed();
 	  
 		// Only track the sun if it is found
-		if (ip.isRedPresent() && ip.isMoreThanHalf()) {
-			if (ip.isMoreThanHalf()) {
-				vector<int> coords = ip.findRedObject();
+		if (ip.isRedPresent()) {
+			vector<int> coords = ip.findRedObject();
+			
+			if (ip.isMoreThanHalf(coords[0], coords[1])) {
 				error = ip.getError(coords[0], coords[1]);
 				mc.adjust((int)error[0], (int)error[1]);
 				
-				printf("error y: %f\n",error[1]);
+				printf("Error: %f, %f\n", error[0], error[1]);
 			} else {
-				printf("Less than half\n");
+				printf("Less than half present\n");
+				mc.reset();
 			}
 		} else {
 			printf("No red object\n");
