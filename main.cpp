@@ -9,7 +9,7 @@ using namespace std;
 
 class ImageProcessing {
 private:
-	const double ratioThreshold = 1.7;
+	const double ratioThreshold = 1.6;
 	const double redThreshold = 100;
 	const double kP = 0.035;
 public:
@@ -145,11 +145,19 @@ private:
 	const int xMotor = 1;
 	const int yMotor = 5;
 	
-	int xCurrent = 48;
-	int yCurrent = 48;
+	int xReset = 56;
+	int yReset = 48;
 	
-	int xReset = 52;
-	int yReset = 52;
+	int xCurrent = xReset;
+	int yCurrent = yReset;
+	
+	void setToCurrent() {
+		set_motors(xMotor, xCurrent);
+		set_motors(yMotor, yCurrent);
+		
+		printf("Motor angles: %d, %d\n", xCurrent, yCurrent);
+		hardware_exchange();
+	}
 public:
 	/**
 	* Proportional adjustment control mechanism
@@ -158,10 +166,7 @@ public:
 		xCurrent -= errX;
 		yCurrent += errY;
 		
-		set_motors(xMotor, xCurrent);
-		set_motors(yMotor, yCurrent);
-		
-		hardware_exchange();
+		setToCurrent();
 	}
 	
 	/**
@@ -171,10 +176,7 @@ public:
 		xCurrent = xReset;
 		yCurrent = yReset;
 		
-		set_motors(xMotor, xCurrent);
-		set_motors(yMotor, yCurrent);
-		
-		hardware_exchange();
+		setToCurrent();
 	}
 };
 
