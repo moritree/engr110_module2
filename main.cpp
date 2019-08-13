@@ -10,8 +10,8 @@ using namespace std;
 class ImageProcessing {
 private:
 	const double ratioThreshold = 1.5;
-	const double redThreshold = 150;
-	const double kP = 0.03;
+	const double redThreshold = 100;
+	const double kP = 0.035;
 public:
 	/**
 	* Returns true if there is at least one red pixel in the given image
@@ -96,7 +96,7 @@ public:
 	/**
 	* Method to determine whether the object located at (row, col) is circular
 	*/
-	boolean isObjectCircular(int row, int col) {
+	bool isObjectCircular(int row, int col) {
 		if (!pixelIsRed(row, col)) return false;
 		return true;
 		
@@ -111,10 +111,32 @@ public:
 	*/
 	vector<double> getError(int row, int col) {
 		vector<double> err;
-		err.push_back((CAMERA_WIDTH / 2 - row) * Kp);
-		err.push_back((CAMERA_HEIGHT / 2 - col) * Kp);
+		err.push_back((CAMERA_WIDTH / 2 - col) * kP);
+		err.push_back((CAMERA_HEIGHT / 2 - row) * kP);
 		
 		return err;
+	}
+	
+	bool isMoreThanHalf() { 
+		int minX = CAMERA_WIDTH;
+		int maxX = 0;
+		int minY = CAMERA_HEIGHT;
+		int maxY = 0;
+		for (int row = 0; row < CAMERA_HEIGHT; row ++) {
+			for (int col = 0; col < CAMERA_WIDTH; col ++) {
+				if (pixelIsRed(row, col)) {
+					if (minX > col) minX = col;
+					if (maxX < col) maxX = col;
+					if (minY > row) minY = row;
+					if (maxY < row) maxY = row;
+				}
+			}
+		}
+		int dx = maxX - minX;
+		int dy = maxY - minY;
+		printf("%d, %d", dx, dy);
+		
+		return (dx * 2 > dy || dy * 2 > dx);
 	}
 };
 
@@ -133,7 +155,7 @@ public:
 	* Proportional adjustment control mechanism
 	*/
 	void adjust(int errX, int errY) {
-		xCurrent += errX;
+		xCurrent -= errX;
 		yCurrent += errY;
 		
 		set_motors(xMotor, xCurrent);
@@ -162,30 +184,37 @@ int main()
  	 cout<<" Hello"<<endl;
  	 err = init(0);
  	 cout<<"After init() error="<<err<<endl;
-  
-  	int yMid = CAMERA_HEIGHT/2;
+
   	int count = 0;
 	vector<double> error;
-  	double Kp = 0.03;
 
  	open_screen_stream();
   
   	ImageProcessing ip;
 	MotorControl mc;
   
-  	while(count < 50){
+  	while(count < 100){
 	  	take_picture();
-	  	update_screen();
+		
+		ip.posterizeRed();
 	  
 		// Only track the sun if it is found
-		if (ip.isRedPresent()) {
-			vector<int> coords = ip.findRedObject();
-	  		error = ip.getError(coords[0], coords[1]);
-			mc.adjust((int)error[0], (int)error[1]);
-			
-	  		printf("Motor: %d\n",motorAdjust);
-	  		printf("error: %f\n",error);
+		if (ip.isRedPresent() && ip.isMoreThanHalf()) {
+			if (ip.isMoreThanHalf()) {
+				vector<int> coords = ip.findRedObject();
+				error = ip.getError(coords[0], coords[1]);
+				mc.adjust((int)error[0], (int)error[1]);
+				
+				printf("error y: %f\n",error[1]);
+			} else {
+				printf("Less than half\n");
+			}
+		} else {
+			printf("No red object\n");
+			mc.reset();
 		}
+		
+		update_screen();
 		
 	  	sleep1(100);
 	  
